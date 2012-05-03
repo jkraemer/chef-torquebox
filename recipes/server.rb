@@ -2,14 +2,23 @@ include_recipe "java::default" if node[:torquebox][:manage_java_installation]
 
 version = node[:torquebox][:version]
 
+user "torquebox" do
+  comment "torquebox"
+  home "/home/torquebox"
+  supports :manage_home => true
+end
+
 tb_tld = "/opt/torquebox"
+prefix = "#{tb_tld}/torquebox-#{version}"
+current = "#{tb_tld}/current"
+
+# Create top level torquebox directory
 directory "#{tb_tld}" do
+  owner "torquebox"
+  group "torquebox"
   recursive true
   action :create
 end
-
-prefix = "#{tb_tld}/torquebox-#{version}"
-current = "#{tb_tld}/current"
 
 ENV['TORQUEBOX_HOME'] = current
 ENV['JBOSS_HOME'] = "#{current}/jboss"
@@ -18,12 +27,6 @@ ENV['PATH'] = "#{ENV['PATH']}:#{ENV['JRUBY_HOME']}/bin"
 
 package "unzip"
 package "upstart"
-
-user "torquebox" do
-  comment "torquebox"
-  home "/home/torquebox"
-  supports :manage_home => true
-end
 
 install_from_release('torquebox') do
   release_url   node[:torquebox][:url]
@@ -57,7 +60,15 @@ execute "torquebox-upstart" do
   })
 end
 
-execute "chown torquebox" do
+# Replace the upstart/configuration file.
+cookbook_file "/etc/init/torquebox.conf" do
+  source "torquebox.conf"
+  owner "root"
+  group "root"
+  mode "644"
+end
+
+execute "chown torquebox in /usr" do
   command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{version}"
 end
 
