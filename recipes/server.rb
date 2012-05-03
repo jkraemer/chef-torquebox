@@ -1,3 +1,5 @@
+include_recipe "java::default" if node[:torquebox][:manage_java_installation]
+
 version = node[:torquebox][:version]
 prefix = "/opt/torquebox-#{version}"
 current = "/opt/torquebox-current"
