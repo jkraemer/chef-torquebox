@@ -49,23 +49,23 @@ execute "torquebox-upstart" do
 end
 
 execute "chown torquebox" do
-    command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{version}"
+  command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{version}"
 end
 
 service "torquebox" do
-    provider Chef::Provider::Service::Upstart
-    action [:enable, :start]
+  provider Chef::Provider::Service::Upstart
+  action [:enable, :start]
 end
 
 # otherwise bundler won't work in jruby
 gem_package 'jruby-openssl' do
-    gem_binary "#{current}/jruby/bin/jgem"
+  gem_binary "#{current}/jruby/bin/jgem"
 end
 
 #allows use of 'torquebox' command through sudo
 cookbook_file "/etc/sudoers.d/torquebox" do
-    source 'sudoers'
-    owner 'root'
-    group 'root'
-    mode '0440'
+  source 'sudoers'
+  owner 'root'
+  group 'root'
+  mode '0440'
 end
