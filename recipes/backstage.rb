@@ -1,4 +1,4 @@
-git package 'git-core'
+package 'git-core'
 
 directory "/var/www/" do
   recursive true
