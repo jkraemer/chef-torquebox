@@ -1,4 +1,4 @@
-deployments = "/opt/torquebox-current/jboss/standalone/deployments"
+deployments = "/opt/torquebox/current/jboss/standalone/deployments"
 
 def initialize(*args)
   super

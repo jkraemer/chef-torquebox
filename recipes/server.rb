@@ -1,8 +1,15 @@
 include_recipe "java::default" if node[:torquebox][:manage_java_installation]
 
 version = node[:torquebox][:version]
-prefix = "/opt/torquebox-#{version}"
-current = "/opt/torquebox-current"
+
+tb_tld = "/opt/torquebox"
+directory "#{tb_tld}" do
+  recursive true
+  action :create
+end
+
+prefix = "#{tb_tld}/torquebox-#{version}"
+current = "#{tb_tld}/current"
 
 ENV['TORQUEBOX_HOME'] = current
 ENV['JBOSS_HOME'] = "#{current}/jboss"
