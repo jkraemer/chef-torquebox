@@ -1,4 +1,4 @@
-maintainer       "Jorge Falcão"
+maintainer       "Jorge Falcao"
 maintainer_email "jlbfalcao@gmail.com"
 license          "Apache 2.0"
 description      "Installs/Configures torquebox"
