@@ -83,13 +83,41 @@ else
   bind_opts = ""
 end
 
+cluster_opts = node[:torquebox][:enable_clustering] ? "--server-config=standalone-ha.xml" : ""
+
 # Replace the upstart/configuration file.
 template "/etc/init/torquebox.conf" do
   source "torquebox.conf.erb"
   owner "root"
   group "root"
   mode "644"
-  variables :bind_opts => bind_opts, :torquebox_dir => current
+  variables :bind_opts => bind_opts, :cluster_opts => cluster_opts, :torquebox_dir => current
+end
+
+initial_hosts = nil
+if node[:torquebox][:enable_clustering] && node[:torquebox][:bind_to_ip_from_node_attrs]
+  # Find other IPs based on the :bind_to_ip_from_nod_attrs attrs
+  clustering_nodes = search(:node, "role:#{node[:torquebox][:clustering_role]} AND chef_environment:#{node.chef_environment}") || []
+  initial_hosts = []
+  clustering_nodes.each do |n|
+    last_value = n
+    node[:torquebox][:bind_to_ip_from_node_attrs].each do |next_key|
+      if last_value && last_value.has_key?(next_key)
+        last_value = last_value[next_key]
+      else
+        last_value = nil
+      end
+    end
+    initial_hosts << "#{last_value}[7600]"
+  end
+  
+  template "#{current}/jboss/standalone/configuration/standalone-ha.xml" do
+    source "standalone-ha.xml.erb"
+    owner "torquebox"
+    group "torquebox"
+    mode "664"
+    variables :initial_hosts => initial_hosts.join(",")
+  end
 end
 
 execute "chown torquebox in /usr" do

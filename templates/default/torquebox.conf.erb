@@ -14,6 +14,6 @@ respawn
 script
 bash << "EOF"
   su - torquebox
-  <%= @torquebox_dir %>/jboss/bin/standalone.sh <%= @bind_opts %> >> <%= node[:torquebox][:log_dir] %>/torquebox.log 2>&1
+  <%= @torquebox_dir %>/jboss/bin/standalone.sh <%= @bind_opts %> <%= @cluster_opts %> >> <%= node[:torquebox][:log_dir] %>/torquebox.log 2>&1
 EOF
 end script
