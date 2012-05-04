@@ -29,7 +29,7 @@ package "unzip"
 package "upstart"
 
 install_from_release('torquebox') do
-  release_url   node[:torquebox][:url]
+  release_url   "http://torquebox.org/release/org/torquebox/torquebox-dist/#{node[:torquebox][:version]}/torquebox-dist-#{node[:torquebox][:version]}-bin.zip"
   home_dir      prefix
   action        [:install, :install_binaries]
   version       version
