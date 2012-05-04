@@ -4,7 +4,7 @@ directory "/var/www/" do
   recursive true
 end
 
-git "/var/www/backstage" do
+git "#{node[:torquebox][:backstage_home]}" do
   repository node[:torquebox][:backstage_gitrepo]
   revision "HEAD"
   destination node[:torquebox][:backstage_home]
