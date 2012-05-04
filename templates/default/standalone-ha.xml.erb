@@ -283,10 +283,10 @@
             </stack>
             <stack name='tcp'>
                 <transport type='TCP' socket-binding='jgroups-tcp' diagnostics-socket-binding='jgroups-diagnostics'/>
-                <% if @initial_hosts %>
+                <% if @infinispan_initial_hosts %>
                 <protocol type="TCPPING">
                     <property name="initial_hosts">
-                        <%= @initial_hosts %>
+                        <%= @infinispan_initial_hosts %>
                     </property>
                 </protocol>
                 <% end %>
@@ -466,7 +466,11 @@
             </hornetq-server>
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:modcluster:1.0'>
+          <% if @mod_cluster_proxies %>
+            <mod-cluster-config proxy-list='<%= @mod_cluster_proxies %>' advertise-socket='modcluster' excluded-contexts='invoker,jbossws,juddi,console'>
+          <% else %>
             <mod-cluster-config advertise-socket='modcluster' excluded-contexts='invoker,jbossws,juddi,console'>
+          <% end %>
                 <dynamic-load-provider>
                     <load-metric type='busyness'/>
                 </dynamic-load-provider>

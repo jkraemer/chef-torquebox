@@ -108,7 +108,7 @@ if node[:torquebox][:enable_clustering] && node[:torquebox][:bind_to_ip_from_nod
         last_value = nil
       end
     end
-    initial_hosts << "#{last_value}[7600]"
+    initial_hosts << "#{last_value}"
   end
   
   template "#{current}/jboss/standalone/configuration/standalone-ha.xml" do
@@ -116,7 +116,8 @@ if node[:torquebox][:enable_clustering] && node[:torquebox][:bind_to_ip_from_nod
     owner "torquebox"
     group "torquebox"
     mode "664"
-    variables :initial_hosts => initial_hosts.join(",")
+    variables :infinispan_initial_hosts => initial_hosts.map{|m| "#{m}[7600]"}.join(","),
+              :mod_cluster_proxies => initial_hosts.map{|m| "#{m}:6666"}.join(",")
   end
 end
 
