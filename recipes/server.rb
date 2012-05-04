@@ -60,12 +60,36 @@ execute "torquebox-upstart" do
   })
 end
 
+# Look up each successive element in the node hash to find the ip address to bind to.
+if node[:torquebox][:bind_to_ip_from_node_attrs]
+  last_value = node
+  node[:torquebox][:bind_to_ip_from_node_attrs].each do |next_key|
+    if last_value.has_key?(next_key)
+      last_value = last_value[next_key]
+    else
+      last_value = nil
+      break
+    end
+  end
+end
+
+# Configure the ip bind options for the template that follows.
+bind_opts = ""
+if last_value
+  bind_opts = "-b #{last_value}"
+elsif node[:torquebox][:bind_to_ip]
+  bind_opts = "-b #{node[:torquebox][:bind_to_ip]}"
+else
+  bind_opts = ""
+end
+
 # Replace the upstart/configuration file.
-cookbook_file "/etc/init/torquebox.conf" do
-  source "torquebox.conf"
+template "/etc/init/torquebox.conf" do
+  source "torquebox.conf.erb"
   owner "root"
   group "root"
   mode "644"
+  variables :bind_opts => bind_opts, :torquebox_dir => current
 end
 
 execute "chown torquebox in /usr" do

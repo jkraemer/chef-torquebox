@@ -2,8 +2,8 @@ description "This is an upstart job file for TorqueBox"
 
 pre-start script
 bash << "EOF"
-  mkdir -p /var/log/torquebox
-  chown -R torquebox /var/log/torquebox
+  mkdir -p <%= node[:torquebox][:log_dir] %>
+  chown -R torquebox <%= node[:torquebox][:log_dir] %>
 EOF
 end script
 
@@ -14,6 +14,6 @@ respawn
 script
 bash << "EOF"
   su - torquebox
-  /opt/torquebox/current/jboss/bin/standalone.sh >> /var/log/torquebox/torquebox.log 2>&1
+  <%= @torquebox_dir %>/jboss/bin/standalone.sh <%= @bind_opts %> >> <%= node[:torquebox][:log_dir] %>/torquebox.log 2>&1
 EOF
 end script
