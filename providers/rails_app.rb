@@ -5,7 +5,7 @@ def initialize(*args)
 end
 
 action :deploy do
-  directory "#{new_resource.install_in}" do
+  directory "#{new_resource.install_in}/#{new_resource.name}" do
     recursive true
     owner "torquebox"
     group "torquebox"
@@ -47,12 +47,13 @@ action :deploy do
     not_if "jruby -S bundle check"
   end
   
-  # Takes way too long
-  # execute "compile assets" do
-  #   command "jruby -S bundle exec rake assets:precompile"
-  #   cwd "#{new_resource.install_in}/#{new_resource.name}"
-  #   environment "RAILS_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
-  # end
+  execute "compile assets" do
+    user "torquebox"
+    group "torquebox"
+    cwd "#{deployed_path}"
+    command "jruby -S bundle exec rake assets:precompile"
+    environment "RAILS_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
+  end
   
   torquebox_application "tb_app:#{new_resource.name}" do
     action :deploy
