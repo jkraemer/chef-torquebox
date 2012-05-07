@@ -11,24 +11,39 @@ action :deploy do
     group "torquebox"
   end
   
-  git "application:#{new_resource.name}" do
-    repository new_resource.git_repository
+  timestamped_deploy "#{new_resource.install_in}/#{new_resource.name}" do
+    repo new_resource.git_repository
+    branch "master"
     revision "HEAD"
-    destination "#{new_resource.install_in}/#{new_resource.name}"
-    action :sync
     user "torquebox"
     group "torquebox"
+    enable_submodules false
+    migrate false
+    # migrate_command ""
+    environment "RACK_ENV" => "production"
+    shallow_clone true
+    action :deploy
+    restart_command do
+    end
+    # git_ssh_wrapper "wrap-ssh4git.sh"
+    scm_provider Chef::Provider::Git
+    purge_before_symlink %w{}
+    create_dirs_before_symlink %w{}
+    symlinks Hash.new # {} doesn't work, as it gets parsed as a block
+    symlink_before_migrate Hash.new
   end
+  
+  deployed_path = "#{new_resource.install_in}/#{new_resource.name}/current"
   
   # Construct/clobber the YAML file
   require "yaml"
-  file "#{new_resource.install_in}/#{new_resource.name}/config/torquebox.yml" do
+  file "#{deployed_path}/config/torquebox.yml" do
     content new_resource.configuration.to_yaml
   end
   
   execute "bundle install" do
     command "jruby -S bundle install"
-    cwd "#{new_resource.install_in}/#{new_resource.name}"
+    cwd "#{deployed_path}"
     not_if "jruby -S bundle check"
   end
   
@@ -41,13 +56,13 @@ action :deploy do
   
   torquebox_application "tb_app:#{new_resource.name}" do
     action :deploy
-    path "#{new_resource.install_in}/#{new_resource.name}"
+    path "#{deployed_path}"
   end
 end
 
 action :undeploy do
   torquebox_application "tb_app:#{new_resource.name}" do
     action :undeploy
-    path "#{new_resource.install_in}/#{new_resource.name}"
+    path "#{deployed_path}"
   end
 end
