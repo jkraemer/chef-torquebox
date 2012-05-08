@@ -92,6 +92,14 @@ template "/etc/init/torquebox.conf" do
   variables :bind_opts => bind_opts, :torquebox_dir => current
 end
 
+# Create non-clustered configuration
+template "#{current}/jboss/standalone/configuration/standalone.xml" do
+  source "standalone.xml.erb"
+  owner "torquebox"
+  group "torquebox"
+  mode "644"
+end
+
 execute "chown torquebox in /usr" do
   command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{version}"
 end
