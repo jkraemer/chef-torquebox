@@ -52,7 +52,7 @@ action :deploy do
     group "torquebox"
     cwd "#{deployed_path}"
     command "jruby -S bundle exec rake assets:precompile"
-    environment "RAILS_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
+    environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
   end
   
   torquebox_application "tb_app:#{new_resource.name}" do
