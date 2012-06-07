@@ -11,4 +11,5 @@ default[:torquebox][:ssl][:enabled] = false
 default[:torquebox][:ssl][:keystore_path] = ""
 default[:torquebox][:ssl][:keystore_alias] = ""
 default[:torquebox][:ssl][:keystore_password] = ""
-
+default[:torquebox][:mod_cluster][:enable] = false
+default[:torquebox][:mod_cluster][:version] = "1.2.0"

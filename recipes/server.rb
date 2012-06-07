@@ -92,12 +92,53 @@ template "/etc/init/torquebox.conf" do
   variables :bind_opts => bind_opts, :torquebox_dir => current
 end
 
-# Create non-clustered configuration
-template "#{current}/jboss/standalone/configuration/standalone.xml" do
-  source "standalone.xml.erb"
-  owner "torquebox"
-  group "torquebox"
-  mode "644"
+if node[:torquebox][:mod_cluster][:enable]
+  cluster_tld = "/opt/mod_cluster"
+  cluster_prefix = "#{cluster_tld}/mod_cluster-#{version}"
+  cluster_current = "#{cluster_tld}/current"
+  
+  # Create top level mod_cluster directory
+  directory "#{cluster_tld}" do
+    owner "torquebox"
+    group "torquebox"
+    recursive true
+    action :create
+  end
+  
+  install_from_release('mod_cluster') do
+    release_url   "http://downloads.jboss.org/mod_cluster/#{node[:torquebox][:mod_cluster][:version]}.Final/mod_cluster-#{node[:torquebox][:mod_cluster][:version]}.Final-linux2-x64-ssl.tar.gz"
+    home_dir      cluster_prefix
+    action        [:unpack]
+    version       node[:torquebox][:mod_cluster][:version]
+    not_if{ File.exists?(cluster_prefix) }
+  end
+  
+  link cluster_current do
+    to cluster_prefix
+  end
+  
+  execute "modcluster installhome" do
+    command "#{cluster_current}/jboss/httpd/sbin/installhome.sh"
+    user "root"
+  end
+  execute "modcluster (re)start" do
+    command "#{cluster_current}/jboss/httpd/sbin/apachectl restart"
+    user "root"
+  end
+  
+  template "#{current}/jboss/standalone/configuration/standalone.xml" do
+    source "standalone.xml.erb"
+    owner "torquebox"
+    group "torquebox"
+    mode "644"
+  end
+else
+  template "#{current}/jboss/standalone/configuration/standalone.xml" do
+    source "standalone.xml.erb"
+    owner "torquebox"
+    group "torquebox"
+    mode "644"
+  end
 end
 
 execute "chown torquebox in /usr" do
