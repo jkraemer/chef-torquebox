@@ -42,7 +42,7 @@ action :deploy do
   end
   
   execute "bundle install" do
-    command "jruby -S bundle install"
+    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle install"
     cwd "#{deployed_path}"
     not_if "jruby -S bundle check"
   end
@@ -51,7 +51,7 @@ action :deploy do
     user "torquebox"
     group "torquebox"
     cwd "#{deployed_path}"
-    command "jruby -S bundle exec rake assets:precompile"
+    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile"
     environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
   end
   
