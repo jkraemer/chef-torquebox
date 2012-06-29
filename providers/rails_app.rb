@@ -13,8 +13,7 @@ action :deploy do
   
   timestamped_deploy "#{new_resource.install_in}/#{new_resource.name}" do
     repo new_resource.git_repository
-    branch "fix_torquebox"
-    revision "HEAD"
+    revision "fix_torquebox"
     user "torquebox"
     group "torquebox"
     enable_submodules false
