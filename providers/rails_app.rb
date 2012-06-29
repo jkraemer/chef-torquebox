@@ -13,7 +13,7 @@ action :deploy do
   
   timestamped_deploy "#{new_resource.install_in}/#{new_resource.name}" do
     repo new_resource.git_repository
-    branch "master"
+    branch "fix_torquebox"
     revision "HEAD"
     user "torquebox"
     group "torquebox"
@@ -47,13 +47,13 @@ action :deploy do
     not_if "jruby -S bundle check"
   end
   
-  execute "compile assets" do
-    user "torquebox"
-    group "torquebox"
-    cwd "#{deployed_path}"
-    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile"
-    environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
-  end
+  # execute "compile assets" do
+  #   user "torquebox"
+  #   group "torquebox"
+  #   cwd "#{deployed_path}"
+  #   command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile"
+  #   environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
+  # end
   
   torquebox_application "tb_app:#{new_resource.name}" do
     action :deploy

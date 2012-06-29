@@ -92,6 +92,14 @@ template "/etc/init/torquebox.conf" do
   variables :bind_opts => bind_opts, :torquebox_dir => current
 end
 
+# Replace the standalone script
+template "#{current}/jboss/bin/standalone.conf" do
+  source "standalone.conf.erb"
+  owner "torquebox"
+  group "torquebox"
+  mode "644"
+end
+
 if node[:torquebox][:mod_cluster][:enable]
   cluster_tld = "/opt/mod_cluster"
   cluster_prefix = "#{cluster_tld}/mod_cluster-#{version}"

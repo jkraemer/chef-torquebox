@@ -14,7 +14,6 @@ respawn
 script
 bash << "EOF"
   su - torquebox
-  ulimit -n 16384
   <%= @torquebox_dir %>/jboss/bin/standalone.sh <%= @bind_opts %> >> <%= node[:torquebox][:log_dir] %>/torquebox.log 2>&1
 EOF
 end script
