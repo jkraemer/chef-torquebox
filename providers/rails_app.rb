@@ -18,13 +18,11 @@ action :deploy do
     group "torquebox"
     enable_submodules false
     migrate false
-    # migrate_command ""
     environment "RACK_ENV" => "production"
     shallow_clone true
     action :deploy
     restart_command do
     end
-    # git_ssh_wrapper "wrap-ssh4git.sh"
     scm_provider Chef::Provider::Git
     purge_before_symlink %w{}
     create_dirs_before_symlink %w{}
