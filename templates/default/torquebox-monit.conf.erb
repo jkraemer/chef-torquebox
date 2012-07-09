@@ -1,0 +1,5 @@
+check process torquebox with pidfile "/opt/torquebox/current/jboss/standalone/torquebox.pid"
+  group torquebox
+  start program = "/usr/bin/env service torquebox start"
+  stop program = "/usr/bin/env service torquebox stop"
+  if failed host <%= @web_host %> port <%= @web_port %> with timeout 10 seconds for 2 cycles then restart
