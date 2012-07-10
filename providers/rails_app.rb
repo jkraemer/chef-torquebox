@@ -18,13 +18,11 @@ action :deploy do
     group "torquebox"
     enable_submodules false
     migrate false
-    # migrate_command ""
     environment "RACK_ENV" => "production"
     shallow_clone true
     action :deploy
     restart_command do
     end
-    # git_ssh_wrapper "wrap-ssh4git.sh"
     scm_provider Chef::Provider::Git
     purge_before_symlink %w{}
     create_dirs_before_symlink %w{}
@@ -46,13 +44,13 @@ action :deploy do
     not_if "jruby -S bundle check"
   end
   
-  execute "compile assets" do
-    user "torquebox"
-    group "torquebox"
-    cwd "#{deployed_path}"
-    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile"
-    environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
-  end
+  # execute "compile assets" do
+  #   user "torquebox"
+  #   group "torquebox"
+  #   cwd "#{deployed_path}"
+  #   command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile"
+  #   environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
+  # end
   
   torquebox_application "tb_app:#{new_resource.name}" do
     action :deploy
