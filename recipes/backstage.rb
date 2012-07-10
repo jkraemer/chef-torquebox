@@ -1,23 +1,9 @@
-package 'git-core'
+include_recipe "torquebox::server"
 
-directory "/var/www/" do
-  recursive true
-end
+execute "jruby -S gem install torquebox-backstage"
 
-git "#{node[:torquebox][:backstage_home]}" do
-  repository node[:torquebox][:backstage_gitrepo]
-  revision "HEAD"
-  destination node[:torquebox][:backstage_home]
-  action :sync
-end
-
-execute "bundle install" do
-  command "jruby -S bundle install"
-  cwd node[:torquebox][:backstage_home]
-  not_if "jruby -S bundle check"
-end
-
-torquebox_application "backstage" do
-  action :deploy
-  path node[:torquebox][:backstage_home]
+if node[:torquebox][:backstage_user] && node[:torquebox][:backstage_password]
+  execute "jruby -S backstage deploy --secure=#{node[:torquebox][:backstage_user]}:#{node[:torquebox][:backstage_password]}"
+else
+  execute "jruby -S backstage deploy"
 end
