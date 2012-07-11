@@ -15,7 +15,7 @@ action :deploy do
 end
 
 action :undeploy do
-  execute "torquebox undeploy #{new_resource.path}" do
+  execute "torquebox undeploy #{new_resource.path}.knob" do
     creates "#{deployments}/#{new_resource.name}.knob-knob.yml.undeployed"
   end
 end
