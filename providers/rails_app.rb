@@ -40,7 +40,7 @@ action :deploy do
   end
   
   execute "bundle install" do
-    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle install"
+    command "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle install --without development test"
     cwd "#{deployed_path}"
     not_if "jruby -S bundle check"
   end
