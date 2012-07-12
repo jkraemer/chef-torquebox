@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?> 
-<server xmlns='urn:jboss:domain:1.2'>
+<server xmlns='urn:jboss:domain:1.3'>
     <extensions>
         <extension module='org.jboss.as.clustering.infinispan'/>
         <extension module='org.jboss.as.cmp'/>
@@ -31,15 +31,15 @@
         <extension module='org.jboss.as.weld'/>
         <extension module='org.torquebox.bootstrap'/>
         <extension module='org.torquebox.core'/>
-        <extension module='org.torquebox.jobs'/>
-        <extension module='org.torquebox.cache'/>
-        <extension module='org.torquebox.cdi'/>
-        <extension module='org.torquebox.services'/>
-        <extension module='org.torquebox.messaging'/>
-        <extension module='org.torquebox.security'/>
-        <extension module='org.torquebox.web'/>
         <extension module='org.torquebox.stomp'/>
+        <extension module='org.torquebox.messaging'/>
+        <extension module='org.torquebox.jobs'/>
+        <extension module='org.torquebox.security'/>
+        <extension module='org.torquebox.services'/>
+        <extension module='org.torquebox.web'/>
+        <extension module='org.torquebox.cdi'/>
         <extension module='org.projectodd.polyglot.hasingleton'/>
+        <extension module='org.projectodd.polyglot.cache'/>
     </extensions>
     <system-properties>
         <property name='org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR' value='false'/>
@@ -49,13 +49,18 @@
         <security-realms>
             <security-realm name='ManagementRealm'>
                 <authentication>
+                    <local default-user='$local'/>
                     <properties path='mgmt-users.properties' relative-to='jboss.server.config.dir'/>
                 </authentication>
             </security-realm>
             <security-realm name='ApplicationRealm'>
                 <authentication>
+                    <local default-user='$local' allowed-users='*'/>
                     <properties path='application-users.properties' relative-to='jboss.server.config.dir'/>
                 </authentication>
+                <authorization>
+                    <properties path='application-roles.properties' relative-to='jboss.server.config.dir'/>
+                </authorization>
             </security-realm>
         </security-realms>
         <management-interfaces>
@@ -111,7 +116,7 @@
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:cmp:1.0'/>
         <subsystem xmlns='urn:jboss:domain:configadmin:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:datasources:1.0'>
+        <subsystem xmlns='urn:jboss:domain:datasources:1.1'>
             <datasources>
                 <datasource jndi-name='java:jboss/datasources/ExampleDS' pool-name='ExampleDS' enabled='true' use-java-context='true'>
                     <connection-url>
@@ -141,8 +146,15 @@
         <subsystem xmlns='urn:jboss:domain:deployment-scanner:1.1'>
             <deployment-scanner path='deployments' relative-to='jboss.server.base.dir' scan-interval='5000' deployment-timeout='1200'/>
         </subsystem>
-        <subsystem xmlns='urn:jboss:domain:ee:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:ejb3:1.2'>
+        <subsystem xmlns='urn:jboss:domain:ee:1.1'>
+            <spec-descriptor-property-replacement>
+                false
+            </spec-descriptor-property-replacement>
+            <jboss-descriptor-property-replacement>
+                true
+            </jboss-descriptor-property-replacement>
+        </subsystem>
+        <subsystem xmlns='urn:jboss:domain:ejb3:1.3'>
             <session-bean>
                 <stateless>
                     <bean-instance-pool-ref pool-name='slsb-strict-max-pool'/>
@@ -180,8 +192,8 @@
             </thread-pools>
             <iiop enable-by-default='false' use-qualified-name='false'/>
         </subsystem>
-        <subsystem xmlns='urn:jboss:domain:infinispan:1.2' default-cache-container='hibernate'>
-            <cache-container name='hibernate' default-cache='local-query'>
+        <subsystem xmlns='urn:jboss:domain:infinispan:1.3'>
+            <cache-container name='hibernate' default-cache='local-query' module='org.jboss.as.jpa.hibernate:4'>
                 <local-cache name='entity'>
                     <transaction mode='NON_XA'/>
                     <eviction strategy='LRU' max-entries='10000'/>
@@ -197,15 +209,16 @@
                     <eviction strategy='NONE'/>
                 </local-cache>
             </cache-container>
-            <cache-container name='torquebox' default-cache='sessions'>
-                <local-cache name='sessions'>
+            <cache-container name='polyglot' default-cache='sessions' aliases='torquebox'>
+                <local-cache name='sessions' start='EAGER'>
                     <eviction strategy='LRU' max-entries='10000'/>
                     <expiration max-idle='100000'/>
+                    <transaction mode='FULL_XA'/>
                 </local-cache>
             </cache-container>
         </subsystem>
-        <subsystem xmlns='urn:jboss:domain:jacorb:1.1'>
-            <orb>
+        <subsystem xmlns='urn:jboss:domain:jacorb:1.2'>
+            <orb socket-binding='jacorb' ssl-socket-binding='jacorb-ssl'>
                 <initializers transactions='spec' security='on'/>
             </orb>
         </subsystem>
@@ -246,7 +259,7 @@
                 <smtp-server outbound-socket-binding-ref='mail-smtp'/>
             </mail-session>
         </subsystem>
-        <subsystem xmlns='urn:jboss:domain:messaging:1.1'>
+        <subsystem xmlns='urn:jboss:domain:messaging:1.2'>
             <hornetq-server>
                 <persistence-enabled>
                     true
@@ -320,7 +333,6 @@
                             <connector-ref connector-name='netty'/>
                         </connectors>
                         <entries>
-                            <entry name='RemoteConnectionFactory'/>
                             <entry name='java:jboss/exported/jms/RemoteConnectionFactory'/>
                         </entries>
                         <consumer-window-size>
@@ -337,8 +349,6 @@
                         </entries>
                     </pooled-connection-factory>
                 </jms-connection-factories>
-                <jms-destinations>
-                </jms-destinations>
                 <jmx-management-enabled>
                     true
                 </jmx-management-enabled>
@@ -347,7 +357,9 @@
                 </security-enabled>
             </hornetq-server>
         </subsystem>
-        <subsystem xmlns='urn:jboss:domain:naming:1.1'/>
+        <subsystem xmlns='urn:jboss:domain:naming:1.2'>
+            <remote-naming/>
+        </subsystem>
         <subsystem xmlns='urn:jboss:domain:osgi:1.2' activation='lazy'>
             <properties>
                 <!-- Specifies the beginning start level of the framework -->
@@ -372,17 +384,14 @@
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:resource-adapters:1.0'/>
         <subsystem xmlns='urn:jboss:domain:sar:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:security:1.1'>
+        <subsystem xmlns='urn:jboss:domain:security:1.2'>
             <security-domains>
                 <security-domain name='other' cache-type='default'>
                     <authentication>
                         <login-module code='Remoting' flag='optional'>
                             <module-option name='password-stacking' value='useFirstPass'/>
                         </login-module>
-                        <login-module code='RealmUsersRoles' flag='required'>
-                            <module-option name='usersProperties' value='${jboss.server.config.dir}/application-users.properties'/>
-                            <module-option name='rolesProperties' value='${jboss.server.config.dir}/application-roles.properties'/>
-                            <module-option name='realm' value='ApplicationRealm'/>
+                        <login-module code='RealmDirect' flag='required'>
                             <module-option name='password-stacking' value='useFirstPass'/>
                         </login-module>
                     </authentication>
@@ -400,7 +409,7 @@
             </security-domains>
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:threads:1.1'/>
-        <subsystem xmlns='urn:jboss:domain:transactions:1.1'>
+        <subsystem xmlns='urn:jboss:domain:transactions:1.2'>
             <core-environment>
                 <process-id>
                     <uuid/>
@@ -411,15 +420,15 @@
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:web:1.1' default-virtual-server='default-host' native='false'>
             <connector name='http' protocol='HTTP/1.1' scheme='http' socket-binding='http'/>
-          <% if node[:torquebox][:ssl][:enabled] %>
-            <connector name='https' protocol='HTTP/1.1' scheme='https' socket-binding='https' secure='true'>
-              <ssl name='https'
-                key-alias='<%= node[:torquebox][:ssl][:keystore_alias] %>'
-                password='<%= node[:torquebox][:ssl][:keystore_password] %>'
-                certificate-key-file='<%= node[:torquebox][:ssl][:keystore_path] %>'
-              />
-            </connector>
-          <% end %>
+            <% if node[:torquebox][:ssl][:enabled] %>
+              <connector name='https' protocol='HTTP/1.1' scheme='https' socket-binding='https' secure='true'>
+                <ssl name='https'
+                  key-alias='<%= node[:torquebox][:ssl][:keystore_alias] %>'
+                  password='<%= node[:torquebox][:ssl][:keystore_password] %>'
+                  certificate-key-file='<%= node[:torquebox][:ssl][:keystore_path] %>'
+                />
+              </connector>
+            <% end %>
             <virtual-server name='default-host'>
                 <alias name='localhost'/>
                 <alias name='example.com'/>
@@ -442,15 +451,15 @@
         <subsystem xmlns='urn:jboss:domain:weld:1.0'/>
         <subsystem xmlns='urn:jboss:domain:torquebox-bootstrap:1.0'/>
         <subsystem xmlns='urn:jboss:domain:torquebox-core:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-jobs:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-cache:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-cdi:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-services:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-messaging:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-security:1.0'/>
-        <subsystem xmlns='urn:jboss:domain:torquebox-web:1.0'/>
         <subsystem xmlns='urn:jboss:domain:torquebox-stomp:1.0' socket-binding='stomp'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-messaging:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-jobs:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-security:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-services:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-web:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:torquebox-cdi:1.0'/>
         <subsystem xmlns='urn:jboss:domain:polyglot-hasingleton:1.0'/>
+        <subsystem xmlns='urn:jboss:domain:polyglot-cache:1.0'/>
     </profile>
     <interfaces>
         <interface name='management'>
@@ -478,6 +487,7 @@
         <socket-binding name='jacorb' interface='unsecure' port='3528'/>
         <socket-binding name='jacorb-ssl' interface='unsecure' port='3529'/>
         <socket-binding name='messaging' port='5445'/>
+        <socket-binding name='messaging-group' port='0' multicast-address='${jboss.messaging.group.address:231.7.7.7}' multicast-port='${jboss.messaging.group.port:9876}'/>
         <socket-binding name='messaging-throughput' port='5455'/>
         <socket-binding name='osgi-http' interface='management' port='8090'/>
         <socket-binding name='remoting' port='4447'/>

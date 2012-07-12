@@ -68,8 +68,7 @@ fi
 # Uncomment to gather JBoss Modules metrics
 #JAVA_OPTS="$JAVA_OPTS -Djboss.modules.metrics=true"
 
-
-JAVA_OPTS="$JAVA_OPTS -Xss2048k $APPEND_JAVA_OPTS"
+JAVA_OPTS="$JAVA_OPTS -Xss2048k -Djruby.compile.invokedynamic=false $APPEND_JAVA_OPTS"
 
 LAUNCH_JBOSS_IN_BACKGROUND=true
 JBOSS_PIDFILE=<%= @jboss_pidfile %>
