@@ -19,4 +19,3 @@ action :undeploy do
     creates "#{deployments}/#{new_resource.name}.knob-knob.yml.undeployed"
   end
 end
-                                                                                
