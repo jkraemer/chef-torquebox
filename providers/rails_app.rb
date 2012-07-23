@@ -26,7 +26,7 @@ action :deploy do
     enable_submodules false
     shallow_clone true
     
-    environment "RACK_ENV" => "production"
+    environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
     
     before_migrate do
       execute "jruby -S gem install bundler" do
