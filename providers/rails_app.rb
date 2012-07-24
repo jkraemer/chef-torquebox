@@ -48,14 +48,6 @@ action :deploy do
   }
   app_directory = "#{new_resource.install_in}/#{new_resource.name}/current"
   
-  # Install bundler
-  execute "jruby -S gem install bundler" do
-    user "torquebox"
-    group "torquebox"
-    cwd app_directory
-    environment app_environment
-  end
-  
   # Vendor the gems
   execute "jruby -S bundle install --without development test --deployment" do
     user "torquebox"
