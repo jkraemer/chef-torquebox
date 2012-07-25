@@ -1,6 +1,7 @@
 include_recipe "java::default" if node[:torquebox][:manage_java_installation]
 
 version = node[:torquebox][:version]
+canonical_version = node[:torquebox][:version_is_incremental_build] ? "2.x.incremental.#{node[:torquebox][:version]}" : node[:torquebox][:version]
 
 user "torquebox" do
   comment "torquebox"
@@ -9,7 +10,7 @@ user "torquebox" do
 end
 
 tb_tld = "/opt/torquebox"
-prefix = "#{tb_tld}/torquebox-#{version}"
+prefix = "#{tb_tld}/torquebox-#{canonical_version}"
 current = "#{tb_tld}/current"
 
 # Create top level torquebox directory
@@ -29,7 +30,7 @@ package "unzip"
 package "upstart"
 
 tb_url = node[:torquebox][:version_is_incremental_build] ? 
-  "http://torquebox.org/2x/builds/torquebox-dist-bin.zip"
+  "http://repository-projectodd.forge.cloudbees.com/incremental/torquebox/#{node[:torquebox][:version]}/torquebox-dist-bin.zip"
   :
   "http://torquebox.org/release/org/torquebox/torquebox-dist/#{node[:torquebox][:version]}/torquebox-dist-#{node[:torquebox][:version]}-bin.zip"
 
@@ -37,7 +38,7 @@ install_from_release('torquebox') do
   release_url   tb_url
   home_dir      prefix
   action        [:install, :install_binaries]
-  version       version
+  version       canonical_version
   checksum      node[:torquebox][:checksum]
   not_if{ File.exists?(prefix) }
 end
@@ -110,7 +111,7 @@ end
 
 if node[:torquebox][:mod_cluster][:enable]
   cluster_tld = "/opt/mod_cluster"
-  cluster_prefix = "#{cluster_tld}/mod_cluster-#{version}"
+  cluster_prefix = "#{cluster_tld}/mod_cluster-#{canonical_version}"
   cluster_current = "#{cluster_tld}/current"
   
   # Create top level mod_cluster directory
@@ -158,7 +159,7 @@ else
 end
 
 execute "chown torquebox in /usr" do
-  command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{version}"
+  command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{canonical_version}"
 end
 
 service "torquebox" do
