@@ -21,7 +21,7 @@ action :deploy do
     enable_submodules false
     shallow_clone true
     
-    environment "RACK_ENV" => "production", "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
+    environment "RACK_ENV" => new_resource.configuration["environment"]["RACK_ENV"], "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
 
     migrate false
     purge_before_symlink %w{}
@@ -43,7 +43,7 @@ action :deploy do
   # this work after the file system is deployed, and then hand it off to Chef. -RG 07/24/2012
   
   app_environment = {
-    "RACK_ENV" => "production",
+    "RACK_ENV" => new_resource.configuration["environment"]["RACK_ENV"],
     "JRUBY_OPTS" => node[:torquebox][:jruby][:opts]
   }
   app_directory = "#{new_resource.install_in}/#{new_resource.name}/current"
@@ -65,7 +65,7 @@ action :deploy do
   end
   
   # Precompile asset pipeline assets
-  execute "jruby -J-Xmx2048m -J-Xms512m -J-Xmn128m -S bundle exec rake assets:precompile" do
+  execute "jruby -S bundle exec rake assets:precompile" do
     user "torquebox"
     group "torquebox"
     cwd app_directory

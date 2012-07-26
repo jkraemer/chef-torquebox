@@ -17,8 +17,7 @@ default[:torquebox][:ssl][:keystore_password] = ""
 default[:torquebox][:mod_cluster][:enable] = false
 default[:torquebox][:mod_cluster][:version] = "1.2.0"
 
-default[:torquebox][:java][:opts]["Xms"] = "384m"
-default[:torquebox][:java][:opts]["Xmx"] = "1024m"
-default[:torquebox][:java][:opts]["XX:MaxPermSize"] = "512m"
-default[:torquebox][:java][:opts]["XX:ReservedCodeCacheSize"] = "128m"
-
+default[:torquebox][:server][:java][:opts]["Xms"] = "384m"
+default[:torquebox][:server][:java][:opts]["Xmx"] = "1024m"
+default[:torquebox][:server][:java][:opts]["XX:MaxPermSize"] = "512m"
+default[:torquebox][:server][:java][:opts]["XX:ReservedCodeCacheSize"] = "128m"
