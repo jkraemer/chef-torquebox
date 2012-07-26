@@ -104,7 +104,8 @@ template "#{current}/jboss/bin/standalone.conf" do
   owner "torquebox"
   group "torquebox"
   variables(
-    :jboss_pidfile => "#{current}/jboss/standalone/torquebox.pid"
+    :jboss_pidfile => "#{current}/jboss/standalone/torquebox.pid",
+    :java_opts => node[:torquebox][:java][:opts]
   )
   mode "644"
 end

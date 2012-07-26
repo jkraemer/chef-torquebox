@@ -47,8 +47,9 @@ fi
 # Specify options to pass to the Java VM.
 #
 if [ "x$JAVA_OPTS" = "x" ]; then
-  JAVA_OPTS="-Xms2048m -Xmx2048m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000"
-  JAVA_OPTS="$JAVA_OPTS -XX:ReservedCodeCacheSize=128m" # Increase from default size of 48mb to avoid "CodeCache is full" warning
+  
+  JAVA_OPTS="-Xms<%= @java_opts["Xms"] %> -Xmx<%= @java_opts["Xmx"] %> -XX:MaxPermSize=<%= @java_opts["XX:MaxPermSize"] %> -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000"
+  JAVA_OPTS="$JAVA_OPTS -XX:ReservedCodeCacheSize=<%= @java_opts["XX:ReservedCodeCacheSize"] %>" # Increase from default size of 48mb to avoid "CodeCache is full" warning
   JAVA_OPTS="$JAVA_OPTS -XX:+UseCodeCacheFlushing" # Flush old compiled code when we hit our max instead of turning off the compiler. See: http://blogs.atlassian.com/2012/05/codecache-is-full-compiler-has-been-disabled/
   JAVA_OPTS="$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
   JAVA_OPTS="$JAVA_OPTS -Djboss.server.default.config=standalone.xml"
