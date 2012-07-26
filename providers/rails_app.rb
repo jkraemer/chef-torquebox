@@ -14,8 +14,7 @@ action :deploy do
   timestamped_deploy "#{new_resource.install_in}/#{new_resource.name}" do
     scm_provider Chef::Provider::Git
     repo new_resource.git_repository
-    branch "master"
-    revision "HEAD"
+    revision new_resource.git_revision
     user "torquebox"
     group "torquebox"
     enable_submodules false
