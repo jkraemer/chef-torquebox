@@ -1,4 +1,9 @@
-include_recipe "java::default" if node[:torquebox][:manage_java_installation]
+#include_recipe "java::default" if node[:torquebox][:manage_java_installation]
+# Install manually until this is fixed: http://tickets.opscode.com/browse/COOK-1497; this fix will only work on ubuntu
+if node[:torquebox][:manage_java_installation]
+  package "openjdk-6-jdk"
+  ENV['JAVA_HOME'] = "/usr/lib/jvm/java-1.6.0-openjdk-amd64" # assumes 64-bit
+end
 
 version = node[:torquebox][:version]
 canonical_version = node[:torquebox][:version_is_incremental_build] ? "2.x.incremental.#{node[:torquebox][:version]}" : node[:torquebox][:version]
