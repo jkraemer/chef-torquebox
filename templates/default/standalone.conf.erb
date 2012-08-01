@@ -52,7 +52,7 @@ if [ "x$JAVA_OPTS" = "x" ]; then
   JAVA_OPTS="$JAVA_OPTS -XX:ReservedCodeCacheSize=<%= @java_opts["XX:ReservedCodeCacheSize"] %>" # Increase from default size of 48mb to avoid "CodeCache is full" warning
   JAVA_OPTS="$JAVA_OPTS -XX:+UseCodeCacheFlushing" # Flush old compiled code when we hit our max instead of turning off the compiler. See: http://blogs.atlassian.com/2012/05/codecache-is-full-compiler-has-been-disabled/
   JAVA_OPTS="$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
-  JAVA_OPTS="$JAVA_OPTS -Djboss.server.default.config=standalone.xml"
+  JAVA_OPTS="$JAVA_OPTS -Djboss.server.default.config=<%= @server_config_file %>"
 else
   echo "JAVA_OPTS already set in environment; overriding default settings with values: $JAVA_OPTS"
 fi

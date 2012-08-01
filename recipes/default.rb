@@ -1,3 +1,13 @@
+#
+# Cookbook Name:: torquebox
+# Recipe:: default
+# Description:: Installs torquebox
+#
+# Copyright 2012, Robby Grossman
+#
+# MIT Licensed, or any other license you want
+#
+
 #include_recipe "java::default" if node[:torquebox][:manage_java_installation]
 # Install manually until this is fixed: http://tickets.opscode.com/browse/COOK-1497; this fix will only work on ubuntu
 if node[:torquebox][:manage_java_installation]
@@ -14,21 +24,17 @@ user "torquebox" do
   supports :manage_home => true
 end
 
-tb_tld = "/opt/torquebox"
-prefix = "#{tb_tld}/torquebox-#{canonical_version}"
-current = "#{tb_tld}/current"
-
 # Create top level torquebox directory
-directory "#{tb_tld}" do
+directory "/opt/torquebox" do
   owner "torquebox"
   group "torquebox"
   recursive true
   action :create
 end
 
-ENV['TORQUEBOX_HOME'] = current
-ENV['JBOSS_HOME'] = "#{current}/jboss"
-ENV['JRUBY_HOME'] = "#{current}/jruby"
+ENV['TORQUEBOX_HOME'] = "/opt/torquebox/current"
+ENV['JBOSS_HOME'] = "/opt/torquebox/current/jboss"
+ENV['JRUBY_HOME'] = "/opt/torquebox/current/jruby"
 ENV['PATH'] = "#{ENV['PATH']}:#{ENV['JRUBY_HOME']}/bin"
 
 package "unzip"
@@ -41,11 +47,11 @@ tb_url = node[:torquebox][:version_is_incremental_build] ?
 
 install_from_release('torquebox') do
   release_url   tb_url
-  home_dir      prefix
+  home_dir      "/opt/torquebox/torquebox-#{canonical_version}"
   action        [:install, :install_binaries]
   version       canonical_version
   checksum      node[:torquebox][:checksum]
-  not_if{ File.exists?(prefix) }
+  not_if{ File.exists?("/opt/torquebox/torquebox-#{canonical_version}") }
 end
 
 template "/etc/profile.d/torquebox.sh" do
@@ -53,21 +59,21 @@ template "/etc/profile.d/torquebox.sh" do
   source "torquebox.erb"
 end
 
-link current do
-  to prefix
+link "/opt/torquebox/current" do
+  to "/opt/torquebox/torquebox-#{canonical_version}"
 end
 
 # install upstart & get it running
 execute "torquebox-upstart" do
   command "jruby -S rake torquebox:upstart:install"
   creates "/etc/init/torquebox.conf"
-  cwd current
+  cwd "/opt/torquebox/current"
   action :run
   environment ({
-    'TORQUEBOX_HOME'=> current,
-    'JBOSS_HOME'=> "#{current}/jboss",
-    'JRUBY_HOME'=> "#{current}jruby",
-    'PATH' => "#{ENV['PATH']}:#{current}/jruby/bin"
+    'TORQUEBOX_HOME'=> "/opt/torquebox/current",
+    'JBOSS_HOME'=> "/opt/torquebox/current/jboss",
+    'JRUBY_HOME'=> "/opt/torquebox/current/jruby",
+    'PATH' => "#{ENV['PATH']}:/opt/torquebox/current/jruby/bin"
   })
 end
 
@@ -84,7 +90,7 @@ if node[:torquebox][:bind_to_ip_from_node_attrs]
   end
 end
 
-# Configure the ip bind options for the template that follows.
+# Configure the ip bind options for the upstart template.
 bind_opts = ""
 if last_value
   bind_opts = "-b #{last_value}"
@@ -100,68 +106,8 @@ template "/etc/init/torquebox.conf" do
   owner "root"
   group "root"
   mode "644"
-  variables :bind_opts => bind_opts, :torquebox_dir => current
-end
-
-# Replace the standalone script
-template "#{current}/jboss/bin/standalone.conf" do
-  source "standalone.conf.erb"
-  owner "torquebox"
-  group "torquebox"
-  variables(
-    :jboss_pidfile => "#{current}/jboss/standalone/torquebox.pid",
-    :java_opts => node[:torquebox][:server][:java][:opts]
-  )
-  mode "644"
-end
-
-if node[:torquebox][:mod_cluster][:enable]
-  cluster_tld = "/opt/mod_cluster"
-  cluster_prefix = "#{cluster_tld}/mod_cluster-#{canonical_version}"
-  cluster_current = "#{cluster_tld}/current"
-  
-  # Create top level mod_cluster directory
-  directory "#{cluster_tld}" do
-    owner "torquebox"
-    group "torquebox"
-    recursive true
-    action :create
-  end
-  
-  install_from_release('mod_cluster') do
-    release_url   "http://downloads.jboss.org/mod_cluster/#{node[:torquebox][:mod_cluster][:version]}.Final/mod_cluster-#{node[:torquebox][:mod_cluster][:version]}.Final-linux2-x64-ssl.tar.gz"
-    home_dir      cluster_prefix
-    action        [:unpack]
-    version       node[:torquebox][:mod_cluster][:version]
-    not_if{ File.exists?(cluster_prefix) }
-  end
-  
-  link cluster_current do
-    to cluster_prefix
-  end
-  
-  execute "modcluster installhome" do
-    command "#{cluster_current}/jboss/httpd/sbin/installhome.sh"
-    user "root"
-  end
-  execute "modcluster (re)start" do
-    command "#{cluster_current}/jboss/httpd/sbin/apachectl restart"
-    user "root"
-  end
-  
-  template "#{current}/jboss/standalone/configuration/standalone.xml" do
-    source "standalone.xml.erb"
-    owner "torquebox"
-    group "torquebox"
-    mode "644"
-  end
-else
-  template "#{current}/jboss/standalone/configuration/standalone.xml" do
-    source "standalone.xml.erb"
-    owner "torquebox"
-    group "torquebox"
-    mode "644"
-  end
+  variables :bind_opts => bind_opts, :torquebox_dir => "/opt/torquebox/current"
+  notifies :restart, "service[torquebox]", :delayed
 end
 
 execute "chown torquebox in /usr" do
@@ -175,7 +121,7 @@ end
 
 # otherwise bundler won't work in jruby
 gem_package 'jruby-openssl' do
-  gem_binary "#{current}/jruby/bin/jgem"
+  gem_binary "/opt/torquebox/current/jruby/bin/jgem"
 end
 
 #allows use of 'torquebox' command through sudo
