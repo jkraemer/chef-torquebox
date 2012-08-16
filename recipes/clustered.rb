@@ -30,7 +30,6 @@ if node[:torquebox][:clustered][:initial_hosts_role] && node[:torquebox][:cluste
   end
 end
 
-# template "/opt/torquebox/current/jboss/standalone/configuration/standalone-ha.xml" do
 template "/opt/torquebox/current/jboss/standalone/configuration/standalone-ha.xml" do
   source "standalone-ha.xml.erb"
   owner "torquebox"
@@ -38,7 +37,7 @@ template "/opt/torquebox/current/jboss/standalone/configuration/standalone-ha.xm
   variables(
     :initial_hosts => initial_host_ips
   )
-  mode "644"
+  mode "664"
   notifies :restart, "service[torquebox]", :delayed
 end
 

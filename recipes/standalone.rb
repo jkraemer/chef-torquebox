@@ -17,7 +17,6 @@ template "/opt/torquebox/current/jboss/bin/standalone.conf" do
     :java_opts => node[:torquebox][:server][:java][:opts],
     :server_config_file => "standalone.xml"
   )
-  mode "644"
+  mode "664"
   notifies :restart, "service[torquebox]", :delayed
 end
-
