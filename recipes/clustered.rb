@@ -35,7 +35,10 @@ template "/opt/torquebox/current/jboss/standalone/configuration/standalone-ha.xm
   owner "torquebox"
   group "torquebox"
   variables(
-    :initial_hosts => initial_host_ips
+    :initial_hosts => initial_host_ips,
+    :messaging_max_delivery_attempts => node[:torquebox][:messaging][:max_delivery_attempts],
+    :messaging_redelivery_delay => node[:torquebox][:messaging][:redelivery_delay],
+    :transactions_timeout => node[:torquebox][:transactions][:timeout]
   )
   mode "664"
   notifies :restart, "service[torquebox]", :delayed

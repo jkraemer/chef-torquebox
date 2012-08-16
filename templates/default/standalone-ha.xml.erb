@@ -435,8 +435,11 @@
                             jms.queue.ExpiryQueue
                         </expiry-address>
                         <redelivery-delay>
-                            0
+                            <%= @messaging_redelivery_delay %>
                         </redelivery-delay>
+                        <max-delivery-attempts> 
+                            <%= @messaging_max_delivery_attempts %>
+                        </max-delivery-attempts>
                         <redistribution-delay>
                             1000
                         </redistribution-delay>
@@ -562,7 +565,7 @@
                 </process-id>
             </core-environment>
             <recovery-environment socket-binding='txn-recovery-environment' status-socket-binding='txn-status-manager'/>
-            <coordinator-environment default-timeout='300'/>
+            <coordinator-environment default-timeout='<%= @transactions_timeout %>'/>
         </subsystem>
         <subsystem xmlns='urn:jboss:domain:web:1.1' default-virtual-server='default-host' native='false'>
             <connector name='http' protocol='HTTP/1.1' scheme='http' socket-binding='http'/>

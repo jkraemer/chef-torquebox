@@ -18,6 +18,11 @@ default[:torquebox][:server][:java][:opts]["Xmx"] = "1024m"
 default[:torquebox][:server][:java][:opts]["XX:MaxPermSize"] = "512m"
 default[:torquebox][:server][:java][:opts]["XX:ReservedCodeCacheSize"] = "128m"
 
+default[:torquebox][:messaging][:max_delivery_attempts] = 10 # Number of times to try a job
+default[:torquebox][:messaging][:redelivery_delay] = 0 # Retry delay, set in milliseconds
+
+default[:torquebox][:transactions][:timeout] = 300 # Default transaction timeout, in seconds
+
 default[:torquebox][:clustered][:mod_cluster][:version] = "1.2.0"
 default[:torquebox][:clustered][:initial_hosts_role] = nil # For platforms that don't support multicast, specify a role from which to pull IPs to use for initial hosts
 default[:torquebox][:clustered][:initial_hosts_attribute] = ["cloud", "local_ipv4"]
