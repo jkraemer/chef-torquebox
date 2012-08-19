@@ -40,9 +40,8 @@ ENV['PATH'] = "#{ENV['PATH']}:#{ENV['JRUBY_HOME']}/bin"
 package "unzip"
 package "upstart"
 
-tb_url = node[:torquebox][:version_is_incremental_build] ? 
-  "http://repository-projectodd.forge.cloudbees.com/incremental/torquebox/#{node[:torquebox][:version]}/torquebox-dist-bin.zip"
-  :
+tb_url = node[:torquebox][:version_is_incremental_build] ?
+  "http://repository-projectodd.forge.cloudbees.com/incremental/torquebox/#{node[:torquebox][:version]}/torquebox-dist-bin.zip" :
   "http://torquebox.org/release/org/torquebox/torquebox-dist/#{node[:torquebox][:version]}/torquebox-dist-#{node[:torquebox][:version]}-bin.zip"
 
 install_from_release('torquebox') do
