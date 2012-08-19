@@ -26,7 +26,14 @@ end
 
 # Create top level torquebox directory
 directory "/opt/torquebox" do
-  owner "torquebox"
+  owner "root"
+  group "root"
+  recursive true
+  action :create
+end
+
+directory "/var/log/torquebox" do
+  owner 'torquebox'
   group "torquebox"
   recursive true
   action :create
@@ -38,7 +45,7 @@ ENV['JRUBY_HOME'] = "/opt/torquebox/current/jruby"
 ENV['PATH'] = "#{ENV['PATH']}:#{ENV['JRUBY_HOME']}/bin"
 
 package "unzip"
-package "upstart"
+#package "upstart"
 
 tb_url = node[:torquebox][:version_is_incremental_build] ?
   "http://repository-projectodd.forge.cloudbees.com/incremental/torquebox/#{node[:torquebox][:version]}/torquebox-dist-bin.zip" :
@@ -53,6 +60,8 @@ install_from_release('torquebox') do
   not_if{ File.exists?("/opt/torquebox/torquebox-#{canonical_version}") }
 end
 
+execute "chown -R torquebox.torquebox /opt/torquebox/current/jboss/standalone/"
+
 template "/etc/profile.d/torquebox.sh" do
   mode "755"
   source "torquebox.erb"
@@ -62,18 +71,20 @@ link "/opt/torquebox/current" do
   to "/opt/torquebox/torquebox-#{canonical_version}"
 end
 
-# install upstart & get it running
-execute "torquebox-upstart" do
-  command "jruby -S rake torquebox:upstart:install"
-  creates "/etc/init/torquebox.conf"
-  cwd "/opt/torquebox/current"
-  action :run
-  environment ({
-    'TORQUEBOX_HOME'=> "/opt/torquebox/current",
-    'JBOSS_HOME'=> "/opt/torquebox/current/jboss",
-    'JRUBY_HOME'=> "/opt/torquebox/current/jruby",
-    'PATH' => "#{ENV['PATH']}:/opt/torquebox/current/jruby/bin"
-  })
+#install etc/default/torquebox
+cookbook_file "/etc/default/torquebox" do
+  source 'torquebox.default'
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+
+# install init script
+cookbook_file "/etc/init.d/torquebox" do
+  source 'torquebox.init'
+  owner 'root'
+  group 'root'
+  mode '0755'
 end
 
 # Look up each successive element in the node hash to find the ip address to bind to.
@@ -100,22 +111,22 @@ else
 end
 
 # Replace the upstart/configuration file.
-template "/etc/init/torquebox.conf" do
-  source "torquebox.conf.erb"
-  owner "root"
-  group "root"
-  mode "644"
-  variables :bind_opts => bind_opts, :torquebox_dir => "/opt/torquebox/current"
-  notifies :restart, "service[torquebox]", :delayed
-end
+#template "/etc/init/torquebox.conf" do
+#  source "torquebox.conf.erb"
+#  owner "root"
+#  group "root"
+#  mode "644"
+#  variables :bind_opts => bind_opts, :torquebox_dir => "/opt/torquebox/current"
+#  notifies :restart, "service[torquebox]", :delayed
+#end
 
-execute "chown torquebox in /usr" do
-  command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{canonical_version}"
-end
+#execute "chown torquebox in /usr" do
+#  command "chown -R torquebox:torquebox /usr/local/share/torquebox-#{canonical_version}"
+#end
 
 service "torquebox" do
-  provider Chef::Provider::Service::Upstart
-  action [:enable, :start]
+  provider Chef::Provider::Service::Init::Debian
+  action [ :enable, :restart ]
 end
 
 # otherwise bundler won't work in jruby
